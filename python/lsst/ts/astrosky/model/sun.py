@@ -44,6 +44,110 @@ class Sun(object):
         """
         pass
 
+    def altitude_times(self, timestamp, longitude, latitude, altitude, upper_limb):
+        """Compute times (morning, evening) when Sun is at a given altitude.
+
+        Parameters
+        ----------
+        timestamp : float
+            The UNIX timestamp from a specific date.
+        longitude : float
+            The longitude of the location on Earth (degrees). South is negative, North is positive
+        latitude : float
+            The latitude of the location on Earth (degrees). West is negative, East is positive.
+        altitude : float
+            The altitude of the Sun for time calculations (degrees).
+        upper_limb : bool
+            Flag to use the upper limb for Sun's altitude. False is Sun's center.
+
+        Returns
+        -------
+        float, float
+            A tuple containing the morning and evening times (hours UT) respectively for the given altitude.
+        """
+        # Compute d of 12h local mean solar time
+        days = self.days_since_2000_jan_0(timestamp) + 0.5 - (longitude / 360.0)
+
+        # Compute local sidereal time of this moment
+        sid_time = self.normalize(self.gmst0(days) + 180.0 + longitude)
+
+        # Compute Sun's RA + Decl at this moment
+        (sun_ra, sun_dec, sun_dist) = self.ra_dec(days)
+
+        # Compute time when Sun is at south - in hours UT
+        time_south = 12.0 - self.normalize(sid_time - sun_ra, from_minus_180=True) / 15.0
+
+        # Compute the Sun's apparent radius, degrees
+        sun_radius = 0.2666 / sun_dist
+
+        # Do correction to upper limb, if necessary
+        if upper_limb:
+            altitude -= sun_radius
+
+        altitude_rad = math.radians(altitude)
+        latitude_rad = math.radians(latitude)
+        sun_dec_rad = math.radians(sun_dec)
+
+        # Compute the diurnal arc that the Sun traverses to reach the specified altitude
+        numer = math.sin(altitude_rad) - math.sin(latitude_rad) * math.sin(sun_dec_rad)
+        denom = math.cos(latitude_rad) * math.cos(sun_dec_rad)
+        cost = numer / denom
+
+        if cost >= 1.0:
+            # Sun always below altitude
+            t = 0.0
+        elif cost <= -1.0:
+            # Sun always above altitude
+            t = 12.0
+        else:
+            # The diurnal arc, hours
+            t = math.degrees(math.acos(cost)) / 15.0
+
+        # Store rise and set times - in hours UT
+        return (time_south - t, time_south + t)
+
+    def astronomical_twilight(self, timestamp, longitude, latitude):
+        """Compute times of astronomical twilight.
+
+        Astronomical twilight starts and ends when the Sun's center is 18 degrees below the horizon.
+
+        Parameters
+        ----------
+        timestamp : float
+            The UNIX timestamp from a specific date.
+        longitude : float
+            The longitude of the location on Earth (degrees). South is negative, North is positive
+        latitude : float
+            The latitude of the location on Earth (degrees). West is negative, East is positive.
+
+        Returns
+        -------
+        float, float
+            A tuple containing the astronomical twilight times (hours UT).
+        """
+        return self.altitude_times(timestamp, longitude, latitude, self.ASTRONOMICAL_TWILIGHT, False)
+
+    def civil_twilight(self, timestamp, longitude, latitude):
+        """Compute times of civil twilight.
+
+        Civil twilight starts and ends when the Sun's center is 6 degrees below the horizon.
+
+        Parameters
+        ----------
+        timestamp : float
+            The UNIX timestamp from a specific date.
+        longitude : float
+            The longitude of the location on Earth (degrees). South is negative, North is positive
+        latitude : float
+            The latitude of the location on Earth (degrees). West is negative, East is positive.
+
+        Returns
+        -------
+        float, float
+            A tuple containing the civil twilight times (hours UT).
+        """
+        return self.altitude_times(timestamp, longitude, latitude, self.CIVIL_TWILIGHT, False)
+
     def days_since_2000_jan_0(self, timestamp):
         """Compute number of days since 2000 Jan 0.0
 
@@ -100,6 +204,27 @@ class Sun(object):
             The Greenwich Mean Sidereal Time in degrees.
         """
         return self.normalize((180.0 + 356.0470 + 282.9404) + (0.9856002585 + 4.70935E-5) * days)
+
+    def nautical_twilight(self, timestamp, longitude, latitude):
+        """Compute times of nautical twilight.
+
+        Nautical twilight starts and ends when the Sun's center is 12 degrees below the horizon.
+
+        Parameters
+        ----------
+        timestamp : float
+            The UNIX timestamp from a specific date.
+        longitude : float
+            The longitude of the location on Earth (degrees). South is negative, North is positive
+        latitude : float
+            The latitude of the location on Earth (degrees). West is negative, East is positive.
+
+        Returns
+        -------
+        float, float
+            A tuple containing the nautical twilight times (hours UT).
+        """
+        return self.altitude_times(timestamp, longitude, latitude, self.NAUTICAL_TWILIGHT, False)
 
     def normalize(self, angle, from_minus_180=False):
         """Normalize angle into range.
@@ -202,68 +327,6 @@ class Sun(object):
 
         return (ra, dec, distance)
 
-    def altitude_times(self, timestamp, longitude, latitude, altitude, upper_limb):
-        """Compute times (morning, evening) when Sun is at a given altitude.
-
-        Parameters
-        ----------
-        timestamp : float
-            The UNIX timestamp from a specific date.
-        longitude : float
-            The longitude of the location on Earth (degrees). South is negative, North is positive
-        latitude : float
-            The latitude of the location on Earth (degrees). West is negative, East is positive.
-        altitude : float
-            The altitude of the Sun for time calculations (degrees).
-        upper_limb : bool
-            Flag to use the upper limb for Sun's altitude. False is Sun's center.
-
-        Returns
-        -------
-        float, float
-            A tuple containing the morning and evening times (hours UT) respectively for the given altitude.
-        """
-        # Compute d of 12h local mean solar time
-        days = self.days_since_2000_jan_0(timestamp) + 0.5 - (longitude / 360.0)
-
-        # Compute local sidereal time of this moment
-        sid_time = self.normalize(self.gmst0(days) + 180.0 + longitude)
-
-        # Compute Sun's RA + Decl at this moment
-        (sun_ra, sun_dec, sun_dist) = self.ra_dec(days)
-
-        # Compute time when Sun is at south - in hours UT
-        time_south = 12.0 - self.normalize(sid_time - sun_ra, from_minus_180=True) / 15.0
-
-        # Compute the Sun's apparent radius, degrees
-        sun_radius = 0.2666 / sun_dist
-
-        # Do correction to upper limb, if necessary
-        if upper_limb:
-            altitude -= sun_radius
-
-        altitude_rad = math.radians(altitude)
-        latitude_rad = math.radians(latitude)
-        sun_dec_rad = math.radians(sun_dec)
-
-        # Compute the diurnal arc that the Sun traverses to reach the specified altitude
-        numer = math.sin(altitude_rad) - math.sin(latitude_rad) * math.sin(sun_dec_rad)
-        denom = math.cos(latitude_rad) * math.cos(sun_dec_rad)
-        cost = numer / denom
-
-        if cost >= 1.0:
-            # Sun always below altitude
-            t = 0.0
-        elif cost <= -1.0:
-            # Sun always above altitude
-            t = 12.0
-        else:
-            # The diurnal arc, hours
-            t = math.degrees(math.acos(cost)) / 15.0
-
-        # Store rise and set times - in hours UT
-        return (time_south - t, time_south + t)
-
     def rise_set(self, timestamp, longitude, latitude):
         """Compute Sun rise and set times.
 
@@ -285,66 +348,3 @@ class Sun(object):
             A tuple containing the Sun rise and set times (hours UT).
         """
         return self.altitude_times(timestamp, longitude, latitude, self.RISE_SET, True)
-
-    def civil_twilight(self, timestamp, longitude, latitude):
-        """Compute times of civil twilight.
-
-        Civil twilight starts and ends when the Sun's center is 6 degrees below the horizon.
-
-        Parameters
-        ----------
-        timestamp : float
-            The UNIX timestamp from a specific date.
-        longitude : float
-            The longitude of the location on Earth (degrees). South is negative, North is positive
-        latitude : float
-            The latitude of the location on Earth (degrees). West is negative, East is positive.
-
-        Returns
-        -------
-        float, float
-            A tuple containing the civil twilight times (hours UT).
-        """
-        return self.altitude_times(timestamp, longitude, latitude, self.CIVIL_TWILIGHT, False)
-
-    def nautical_twilight(self, timestamp, longitude, latitude):
-        """Compute times of nautical twilight.
-
-        Nautical twilight starts and ends when the Sun's center is 12 degrees below the horizon.
-
-        Parameters
-        ----------
-        timestamp : float
-            The UNIX timestamp from a specific date.
-        longitude : float
-            The longitude of the location on Earth (degrees). South is negative, North is positive
-        latitude : float
-            The latitude of the location on Earth (degrees). West is negative, East is positive.
-
-        Returns
-        -------
-        float, float
-            A tuple containing the nautical twilight times (hours UT).
-        """
-        return self.altitude_times(timestamp, longitude, latitude, self.NAUTICAL_TWILIGHT, False)
-
-    def astronomical_twilight(self, timestamp, longitude, latitude):
-        """Compute times of astronomical twilight.
-
-        Astronomical twilight starts and ends when the Sun's center is 18 degrees below the horizon.
-
-        Parameters
-        ----------
-        timestamp : float
-            The UNIX timestamp from a specific date.
-        longitude : float
-            The longitude of the location on Earth (degrees). South is negative, North is positive
-        latitude : float
-            The latitude of the location on Earth (degrees). West is negative, East is positive.
-
-        Returns
-        -------
-        float, float
-            A tuple containing the astronomical twilight times (hours UT).
-        """
-        return self.altitude_times(timestamp, longitude, latitude, self.ASTRONOMICAL_TWILIGHT, False)

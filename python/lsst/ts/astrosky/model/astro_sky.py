@@ -36,16 +36,6 @@ class AstronomicalSkyModel(object):
         """
         self.exclude_planets = exclude_planets
 
-    def update(self, timestamp):
-        """Update the internal timestamp.
-
-        Parameters
-        ----------
-        timestamp : float
-            The UNIX timestamp to update the internal timestamp to.
-        """
-        self.date_profile.update(timestamp)
-
     def get_airmass(self, ids):
         """Get the airmass of the fields.
 
@@ -328,6 +318,16 @@ class AstronomicalSkyModel(object):
         config.append(("sky_brightness_pre/timestep_max", header['timestep_max'] * 24 * 3600))
         config.append(("sky_brightness_pre/dm", header['dm']))
         return config
+
+    def update(self, timestamp):
+        """Update the internal timestamp.
+
+        Parameters
+        ----------
+        timestamp : float
+            The UNIX timestamp to update the internal timestamp to.
+        """
+        self.date_profile.update(timestamp)
 
     def update_location(self, location):
         """Update the current location.
