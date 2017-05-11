@@ -9,7 +9,7 @@ class Sun(object):
     """
     This class is a partial port of the converted Python class provided by Henrik Härkönen <radix@kortis.to>.
 
-    NOTE: Only the functions that provide the "rise" and "set" times for a given altitude on a given
+    **NOTE**: Only the functions that provide the "rise" and "set" times for a given altitude on a given
     day and the supporting functions have been ported into this class. Their APIs were changed to fit the
     current use.
 
@@ -71,7 +71,7 @@ class Sun(object):
         # Compute local sidereal time of this moment
         sid_time = self.normalize(self.gmst0(days) + 180.0 + longitude)
 
-        # Compute Sun's RA + Decl at this moment
+        # Compute Sun's RA + Dec at this moment
         (sun_ra, sun_dec, sun_dist) = self.ra_dec(days)
 
         # Compute time when Sun is at south - in hours UT
@@ -171,7 +171,7 @@ class Sun(object):
         """Compute the Greenwich Mean Sidereal Time at 0h UT
 
         This function computes GMST0, the Greenwich Mean Sidereal Time
-        at 0h UT (i.e. the sidereal time at the Greenwhich meridian at
+        at 0h UT (i.e. the sidereal time at the Greenwich meridian at
         0h UT).  GMST is then the sidereal time at Greenwich at any
         time of the day.  I've generalized GMST0 as well, and define it
         as:  GMST0 = GMST - UT  --  this allows GMST0 to be computed at
@@ -230,7 +230,7 @@ class Sun(object):
         """Normalize angle into range.
 
         This function normalizes the given angle into the range 0 to 360. If the flag is
-        used, the range becomes -180 to 180. NOTE: This function expects the angle in
+        used, the range becomes -180 to 180. **NOTE**: This function expects the angle in
         degrees.
 
         Parameters
@@ -254,7 +254,7 @@ class Sun(object):
         """Compute the ecliptic longitude and distance.
 
         This function computes the Sun's ecliptic longitude and distance at the days given.
-        The Sun's eclipcit latitude is not computed since it's always very near zero.
+        The Sun's ecliptic latitude is not computed since it's always very near zero.
 
         Parameters
         ----------
@@ -305,7 +305,7 @@ class Sun(object):
         (float, float, float)
             A tuple containing the RA (degrees), Dec (degrees) and distance (AU).
         """
-        # Compute Sun's ecliptical coordinates
+        # Compute Sun's ecliptic coordinates
         (longitude, distance) = self.position(days)
 
         # Compute ecliptic rectangular coordinates (z=0)

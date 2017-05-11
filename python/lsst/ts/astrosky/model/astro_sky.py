@@ -60,7 +60,7 @@ class AstronomicalSkyModel(object):
         Parameters
         ----------
         ra : numpy.array
-            The right-ascension (radians) of the sky position.
+            The right ascension (radians) of the sky position.
         dec : numpy.array
             The declination (radians) of the sky position.
 
@@ -79,7 +79,7 @@ class AstronomicalSkyModel(object):
         Parameters
         ----------
         ra : numpy.array
-            The right-ascension (radians) of the sky position.
+            The right ascension (radians) of the sky position.
 
         Returns
         -------
@@ -94,14 +94,14 @@ class AstronomicalSkyModel(object):
     def get_moon_sun_info(self, field_ra, field_dec):
         """Return the current moon and sun information.
 
-        This function gets the right-ascension, declination, altitude, azimuth, phase and
-        angular distance from target (by given ra and dec) for the moon and the right-ascension,
+        This function gets the right ascension, declination, altitude, azimuth, phase and
+        angular distance from target (by given ra and dec) for the moon and the right ascension,
         declination, altitude, azimuth and solar elongation from target (by given ra and dec) for the sun.
 
         Parameters
         ----------
         field_ra : numpy.array
-            The target right-ascension (radians).
+            The target right ascension (radians).
         field_dec : numpy.array
             The target declination (radians).
 
@@ -132,8 +132,8 @@ class AstronomicalSkyModel(object):
         """Return the set/rise times of the sun for the given altitude.
 
         This function calculates the night boundaries (the set and rise times) for a
-        given sun altitude. It uses the currently stored timestamp in the :class:`DateProfile`
-        instance.
+        given sun altitude. It uses the currently stored timestamp in the
+        lsst.ts.dateloc.DateProfile instance.
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class AstronomicalSkyModel(object):
         Returns
         -------
         tuple (float, float)
-            A tuple of the set and rise times, respectively, for the sun_altitiude.
+            A tuple of the set and rise times, respectively, for the sun altitude.
         """
         longitude, latitude = (self.date_profile.location.longitude, self.date_profile.location.latitude)
 
@@ -181,16 +181,16 @@ class AstronomicalSkyModel(object):
 
         This function returns the separation (in radians) between the given body (either moon or
         sun) and a given set of fields. It uses a list of (RA, Dec) coordinates. This function
-        assumes that meth:`.get_sky_brightness` has been run.
+        assumes that :meth:`.get_sky_brightness` has been run.
 
         Parameters
         ----------
         body : str
             The name of the body to calculate the separation. Either moon or sun.
         field_ra : numpy.array(float)
-            The list of field Right Ascensions in radians.
+            The list of field right ascensions in radians.
         field_dec : numpy.array(float)
-            The list of field Declinations in radians.
+            The list of field declinations in radians.
 
         Returns
         -------
@@ -205,7 +205,7 @@ class AstronomicalSkyModel(object):
         """Get the LSST 6 filter sky brightness for a set of fields at a single time.
 
         This function retrieves the LSST 6 filter sky brightness magnitudes for a given set
-        of fields at the MJD kept by the :class:`.DateProfile.`
+        of fields at the MJD kept by the lsst.ts.dateloc.DateProfile.
 
         The field ids stored in the sky brightness data are off-by-one from the stored field ids,
         hence the subtraction.
@@ -283,7 +283,7 @@ class AstronomicalSkyModel(object):
         fid : numpy.array
            The field id.
         ra : numpy.array
-            The field right-ascension (radians).
+            The field right ascension (radians).
         dec : numpy.array
             The field declination (radians).
 
@@ -334,7 +334,7 @@ class AstronomicalSkyModel(object):
 
         Parameters
         ----------
-        location : :class:.`ObservatoryLocation`
+        location : lsst.ts.dateloc.ObservatoryLocation
             The instance of an ObservatoryLocation containing the relevant information.
         """
         self.date_profile.location = location
