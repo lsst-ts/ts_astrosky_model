@@ -246,7 +246,7 @@ class AstronomicalSkyModel(object):
         Parameters
         ----------
         timestamp : float
-            The UNIX timestamp to start the time block.
+            The UTC timestamp to start the time block.
         timestep : float
             The number of seconds to increment the timestamp with.
         num_steps : int
@@ -325,7 +325,7 @@ class AstronomicalSkyModel(object):
         Parameters
         ----------
         timestamp : float
-            The UNIX timestamp to update the internal timestamp to.
+            The UTC timestamp to update the internal timestamp to.
         """
         self.date_profile.update(timestamp)
 
