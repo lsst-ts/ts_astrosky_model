@@ -9,6 +9,7 @@ Table of Contents
    :maxdepth: 2
 
    installation
+   usage
    history
 
 Class Documentation
