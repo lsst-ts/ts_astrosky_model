@@ -4,6 +4,7 @@ import palpy
 
 from lsst.sims.skybrightness_pre import SkyModelPre
 from lsst.sims.skybrightness_pre import __version__ as sky_model_pre_version
+from lsst.sims.utils import _raDec2Hpid
 
 from lsst.ts.astrosky.model import Sun
 from lsst.ts.dateloc import DateProfile
@@ -22,7 +23,8 @@ class AstronomicalSkyModel(object):
         """
         self.log = logging.getLogger("sky_model.AstronomicalSkyModel")
         self.date_profile = DateProfile(0, location)
-        self.sky_brightness = SkyModelPre(opsimFields=True)
+        self.sky_brightness = SkyModelPre()
+        self._sb_nside = self.sky_brightness.nside
         self.sun = Sun()
         self.exclude_planets = True
 
@@ -36,7 +38,7 @@ class AstronomicalSkyModel(object):
         """
         self.exclude_planets = exclude_planets
 
-    def get_airmass(self, ids):
+    def get_airmass(self, ra, dec):
         """Get the airmass of the fields.
 
         The field ids stored in the airmass data are off-by-one from the stored field ids,
@@ -44,15 +46,18 @@ class AstronomicalSkyModel(object):
 
         Parameters
         ----------
-        ids : list or numpy.array
-            The set of fields to retrieve the airmass for.
+        ra : numpy.array
+            The right ascension (radians) of the sky position.
+        dec : numpy.array
+            The declination (radians) of the sky position.
 
         Returns
         -------
         numpy.array
             The set of airmasses.
         """
-        return self.sky_brightness.returnAirmass(self.date_profile.mjd, indx=ids - 1, badval=float('nan'))
+        ids = _raDec2Hpid(self._sb_nside, ra, dec)
+        return self.sky_brightness.returnAirmass(self.date_profile.mjd, indx=ids, badval=float('nan'))
 
     def get_alt_az(self, ra, dec):
         """Get the altitude (radians) and azimuth (radians) of a given sky position.
@@ -201,19 +206,18 @@ class AstronomicalSkyModel(object):
         return palpy.dsepVector(field_ra, field_dec, numpy.full_like(field_ra, attrs["{}RA".format(body)]),
                                 numpy.full_like(field_dec, attrs["{}Dec".format(body)]))
 
-    def get_sky_brightness(self, ids, extrapolate=False, override_exclude_planets=None):
-        """Get the LSST 6 filter sky brightness for a set of fields at a single time.
+    def get_sky_brightness(self, ra, dec, extrapolate=False, override_exclude_planets=None):
+        """Get the LSST 6 filter sky brightness for a set of coordinates at a single time.
 
         This function retrieves the LSST 6 filter sky brightness magnitudes for a given set
         of fields at the MJD kept by the lsst.ts.dateloc.DateProfile.
 
-        The field ids stored in the sky brightness data are off-by-one from the stored field ids,
-        hence the subtraction.
-
         Parameters
         ----------
-        ids : list or numpy.array
-            The set of fields to retrieve the sky brightness for.
+        ra : numpy.array
+            The set of fields RA coordinates to retrieve the sky brightness for.
+        dec : numpy.array
+            The set of fields RA coordinates to retrieve the sky brightness for.
         extrapolate : boolean, optional
             Flag to extrapolate fields with bad sky brightness to nearest field that is good.
         override_exclude_planets : boolean, optional
@@ -229,7 +233,9 @@ class AstronomicalSkyModel(object):
         else:
             exclude_planets = self.exclude_planets
 
-        return self.sky_brightness.returnMags(self.date_profile.mjd, indx=ids - 1,
+        ids = _raDec2Hpid(self._sb_nside, ra, dec)
+
+        return self.sky_brightness.returnMags(self.date_profile.mjd, indx=ids,
                                               badval=float('nan'), zenith_mask=False,
                                               planet_mask=exclude_planets,
                                               extrapolate=extrapolate)
@@ -272,7 +278,7 @@ class AstronomicalSkyModel(object):
 
         return mags
 
-    def get_target_information(self, fid, ra, dec):
+    def get_target_information(self, ra, dec):
         """Get information about target(s).
 
         This function gathers airmass, altitude (radians) and azimuth (radians) information
@@ -280,8 +286,6 @@ class AstronomicalSkyModel(object):
 
         Parameters
         ----------
-        fid : numpy.array
-           The field id.
         ra : numpy.array
             The field right ascension (radians).
         dec : numpy.array
@@ -293,7 +297,7 @@ class AstronomicalSkyModel(object):
             Set of information about the target(s).
         """
         info_dict = {}
-        info_dict["airmass"] = self.get_airmass(fid)
+        info_dict["airmass"] = self.get_airmass(ra, dec)
         altitude, azimuth = self.get_alt_az(ra, dec)
         info_dict["altitude"] = altitude
         info_dict["azimuth"] = azimuth
