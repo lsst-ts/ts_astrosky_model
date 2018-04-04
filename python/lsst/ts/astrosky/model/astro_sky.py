@@ -240,7 +240,7 @@ class AstronomicalSkyModel(object):
                                               planet_mask=exclude_planets,
                                               extrapolate=extrapolate)
 
-    def get_sky_brightness_timeblock(self, timestamp, timestep, num_steps, ids):
+    def get_sky_brightness_timeblock(self, timestamp, timestep, num_steps, ra, dec):
         """Get LSST 6 filter sky brightness for a set of fields for a range of times.
 
         This function retrieves the LSST 6 filter sky brightness magnitudes for a given set
@@ -257,8 +257,10 @@ class AstronomicalSkyModel(object):
             The number of seconds to increment the timestamp with.
         num_steps : int
             The number of steps to create for the time block.
-        ids : list or numpy.array
-            The set of fields to retrieve the sky brightness for.
+        ra : numpy.array
+            The set of fields RA coordinates to retrieve the sky brightness for.
+        dec : numpy.array
+            The set of fields RA coordinates to retrieve the sky brightness for.
 
         Returns
         -------
@@ -267,10 +269,12 @@ class AstronomicalSkyModel(object):
         """
         dp = DateProfile(0, self.date_profile.location)
         mags = []
-        for i in xrange(num_steps):
+        ids = _raDec2Hpid(self._sb_nside, ra, dec)
+
+        for i in range(num_steps):
             ts = timestamp + i * timestep
             mjd, _ = dp(ts)
-            mags.append(self.sky_brightness.returnMags(dp.mjd, indx=ids - 1,
+            mags.append(self.sky_brightness.returnMags(dp.mjd, indx=ids,
                                                        badval=float('nan'),
                                                        zenith_mask=False,
                                                        planet_mask=self.exclude_planets,
