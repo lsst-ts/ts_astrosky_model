@@ -66,12 +66,12 @@ class AstronomicalSkyTest(unittest.TestCase):
                                                                self.dec_rads)
         self.assertEqual(len(sky_mags), number_of_steps)
         self.assertEqual(sky_mags[0]['g'].size, self.field_ids.size)
-        self.assertAlmostEqual(sky_mags[0]['u'][0], 18.904290175691482, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['g'][0], 19.204759346714887, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['r'][0], 19.305869798246118, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230014671342424, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['z'][0], 17.239928456934091, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072439551790243, delta=1e-7)
+        self.assertAlmostEqual(sky_mags[0]['u'][0], 18.905, delta=1e-2)
+        self.assertAlmostEqual(sky_mags[0]['g'][0], 19.205, delta=1e-2)
+        self.assertAlmostEqual(sky_mags[0]['r'][0], 19.306, delta=1e-2)
+        self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230, delta=1e-2)
+        self.assertAlmostEqual(sky_mags[0]['z'][0], 17.240, delta=1e-2)
+        self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072, delta=1e-2)
 
     def test_get_night_boundaries(self):
         # 2022/01/01
