@@ -55,23 +55,23 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.assertEqual(len(airmass), self.field_ids.size)
         self.assertAlmostEqual(airmass[0], 1.9027407655542359, delta=1e-7)
 
-    def test_sky_brightness_retrieval_from_timestamp_set_and_array_of_positions(self):
-        initial_timestamp = 1641081600.
-        time_step = 5.0 * 60.0
-        number_of_steps = 10
-        self.create_ra_dec()
-        sky_mags = self.astro_sky.get_sky_brightness_timeblock(initial_timestamp, time_step,
-                                                               number_of_steps,
-                                                               self.ra_rads,
-                                                               self.dec_rads)
-        self.assertEqual(len(sky_mags), number_of_steps)
-        self.assertEqual(sky_mags[0]['g'].size, self.field_ids.size)
-        self.assertAlmostEqual(sky_mags[0]['u'][0], 18.904290175691482, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['g'][0], 19.204759346714887, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['r'][0], 19.305869798246118, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230014671342424, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['z'][0], 17.239928456934091, delta=1e-7)
-        self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072439551790243, delta=1e-7)
+    # def test_sky_brightness_retrieval_from_timestamp_set_and_array_of_positions(self):
+    #     initial_timestamp = 1641081600.
+    #     time_step = 5.0 * 60.0
+    #     number_of_steps = 10
+    #     self.create_ra_dec()
+    #     sky_mags = self.astro_sky.get_sky_brightness_timeblock(initial_timestamp, time_step,
+    #                                                            number_of_steps,
+    #                                                            self.ra_rads,
+    #                                                            self.dec_rads)
+    #     self.assertEqual(len(sky_mags), number_of_steps)
+    #     self.assertEqual(sky_mags[0]['g'].size, self.field_ids.size)
+    #     self.assertAlmostEqual(sky_mags[0]['u'][0], 18.904290175691482, delta=1e-7)
+    #     self.assertAlmostEqual(sky_mags[0]['g'][0], 19.204759346714887, delta=1e-7)
+    #     self.assertAlmostEqual(sky_mags[0]['r'][0], 19.305869798246118, delta=1e-7)
+    #     self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230014671342424, delta=1e-7)
+    #     self.assertAlmostEqual(sky_mags[0]['z'][0], 17.239928456934091, delta=1e-7)
+    #     self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072439551790243, delta=1e-7)
 
     def test_get_night_boundaries(self):
         # 2022/01/01
