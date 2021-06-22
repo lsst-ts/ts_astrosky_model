@@ -28,12 +28,11 @@ from lsst.ts.dateloc import ObservatoryLocation
 
 
 class AstronomicalSkyTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.start_stamp = 1664582400
-        warnings.filterwarnings('ignore', category=RuntimeWarning, append=True)
-        warnings.filterwarnings('ignore', category=FutureWarning, append=True)
+        warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
+        warnings.filterwarnings("ignore", category=FutureWarning, append=True)
         cls.lsst_site = ObservatoryLocation()
         cls.lsst_site.for_lsst()
         cls.astro_sky = AstronomicalSkyModel(cls.lsst_site)
@@ -41,14 +40,20 @@ class AstronomicalSkyTest(unittest.TestCase):
         cls.sun_altitude = -12.0
 
     def create_ra_dec(self):
-        self.ra_rads = numpy.radians(numpy.linspace(0., 90., 19))
-        self.dec_rads = numpy.radians(numpy.linspace(-90., 0., 19))
+        self.ra_rads = numpy.radians(numpy.linspace(0.0, 90.0, 19))
+        self.dec_rads = numpy.radians(numpy.linspace(-90.0, 0.0, 19))
         self.field_ids = numpy.arange(1, 20)
 
     def check_night_boundary_tuple(self, truth_set_timestamp, truth_rise_timestamp):
-        (set_timestamp, rise_timestamp) = self.astro_sky.get_night_boundaries(self.sun_altitude)
-        self.assertAlmostEqual(set_timestamp, truth_set_timestamp, delta=self.time_tolerance)
-        self.assertAlmostEqual(rise_timestamp, truth_rise_timestamp, delta=self.time_tolerance)
+        (set_timestamp, rise_timestamp) = self.astro_sky.get_night_boundaries(
+            self.sun_altitude
+        )
+        self.assertAlmostEqual(
+            set_timestamp, truth_set_timestamp, delta=self.time_tolerance
+        )
+        self.assertAlmostEqual(
+            rise_timestamp, truth_rise_timestamp, delta=self.time_tolerance
+        )
 
     def test_basic_information_after_initial_creation(self):
         self.assertIsNotNone(self.astro_sky.date_profile)
@@ -65,32 +70,31 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.astro_sky.update(self.start_stamp)
         sky_mags = self.astro_sky.get_sky_brightness(self.ra_rads, self.dec_rads)
         self.assertEqual(len(sky_mags), 6)
-        self.assertEqual(sky_mags['g'].size, self.field_ids.size)
+        self.assertEqual(sky_mags["g"].size, self.field_ids.size)
 
     def test_airmass_retrieval(self):
         self.create_ra_dec()
         self.astro_sky.update(self.start_stamp)
         airmass = self.astro_sky.get_airmass(self.ra_rads, self.dec_rads)
         self.assertEqual(len(airmass), self.field_ids.size)
-        #self.assertAlmostEqual(airmass[0], 2.0103071012982774, delta=1e-7)
+        # self.assertAlmostEqual(airmass[0], 2.0103071012982774, delta=1e-7)
 
     def test_sky_brightness_retrieval_from_timestamp_set_and_array_of_positions(self):
         initial_timestamp = self.start_stamp
         time_step = 5.0 * 60.0
         number_of_steps = 10
         self.create_ra_dec()
-        sky_mags = self.astro_sky.get_sky_brightness_timeblock(initial_timestamp, time_step,
-                                                               number_of_steps,
-                                                               self.ra_rads,
-                                                               self.dec_rads)
+        sky_mags = self.astro_sky.get_sky_brightness_timeblock(
+            initial_timestamp, time_step, number_of_steps, self.ra_rads, self.dec_rads
+        )
         self.assertEqual(len(sky_mags), number_of_steps)
-        self.assertEqual(sky_mags[0]['g'].size, self.field_ids.size)
-        #self.assertAlmostEqual(sky_mags[0]['u'][0], 21.991, delta=1e-2)
-        #self.assertAlmostEqual(sky_mags[0]['g'][0], 21.407, delta=1e-2)
-        #self.assertAlmostEqual(sky_mags[0]['r'][0], 19.306, delta=1e-2)
-        #self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230, delta=1e-2)
-        #self.assertAlmostEqual(sky_mags[0]['z'][0], 17.240, delta=1e-2)
-        #self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072, delta=1e-2)
+        self.assertEqual(sky_mags[0]["g"].size, self.field_ids.size)
+        # self.assertAlmostEqual(sky_mags[0]['u'][0], 21.991, delta=1e-2)
+        # self.assertAlmostEqual(sky_mags[0]['g'][0], 21.407, delta=1e-2)
+        # self.assertAlmostEqual(sky_mags[0]['r'][0], 19.306, delta=1e-2)
+        # self.assertAlmostEqual(sky_mags[0]['i'][0], 18.230, delta=1e-2)
+        # self.assertAlmostEqual(sky_mags[0]['z'][0], 17.240, delta=1e-2)
+        # self.assertAlmostEqual(sky_mags[0]['y'][0], 16.072, delta=1e-2)
 
     def test_get_night_boundaries(self):
         # 2022/01/01
@@ -138,18 +142,22 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.check_night_boundary_tuple(1947713387.331446, 1947750106.804758)
 
     def test_separation_function(self):
-        initial_timestamp = self.start_stamp + (.04166666666 * 3600 * 24)
+        initial_timestamp = self.start_stamp + (0.04166666666 * 3600 * 24)
         self.create_ra_dec()
         self.astro_sky.update(initial_timestamp)
-        field_moon_sep = self.astro_sky.get_separation("moon", self.ra_rads, self.dec_rads)
+        field_moon_sep = self.astro_sky.get_separation(
+            "moon", self.ra_rads, self.dec_rads
+        )
         self.assertEqual(field_moon_sep.size, 19)
-        #self.assertAlmostEqual(field_moon_sep[0], numpy.radians(64.6988849))
-        field_sun_sep = self.astro_sky.get_separation("sun", self.ra_rads, self.dec_rads)
+        # self.assertAlmostEqual(field_moon_sep[0], numpy.radians(64.6988849))
+        field_sun_sep = self.astro_sky.get_separation(
+            "sun", self.ra_rads, self.dec_rads
+        )
         self.assertEqual(field_sun_sep.size, 19)
-        #self.assertAlmostEqual(field_sun_sep[0], numpy.radians(67.06949045))
+        # self.assertAlmostEqual(field_sun_sep[0], numpy.radians(67.06949045))
 
     def test_moon_sun_information(self):
-        initial_timestamp = self.start_stamp + (.04166666666 * 3600 * 24)
+        initial_timestamp = self.start_stamp + (0.04166666666 * 3600 * 24)
         self.create_ra_dec()
         self.astro_sky.update(initial_timestamp)
         info = self.astro_sky.get_moon_sun_info(self.ra_rads, self.dec_rads)
@@ -163,17 +171,17 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.assertAlmostEqual(info["solarElong"][0], 1.5164994743846043, delta=1e-7)
 
     def test_target_information(self):
-        initial_timestamp = self.start_stamp + (.04166666666 * 3600 * 24)
+        initial_timestamp = self.start_stamp + (0.04166666666 * 3600 * 24)
         self.create_ra_dec()
         self.astro_sky.update(initial_timestamp)
         info = self.astro_sky.get_target_information(self.ra_rads, self.dec_rads)
         self.assertEqual(len(info), 3)
-        self.assertEqual(info['airmass'].size, self.field_ids.size)
-        self.assertEqual(info['altitude'].size, self.ra_rads.size)
-        self.assertEqual(info['azimuth'].size, self.ra_rads.size)
-        #self.assertAlmostEqual(info['airmass'][0], 1.9875095273411756, delta=1e-7)
-        #self.assertAlmostEqual(info['altitude'][0], 0.52786436029017303, delta=1e-7)
-        self.assertFalse(numpy.isnan(info['azimuth'][0]))
+        self.assertEqual(info["airmass"].size, self.field_ids.size)
+        self.assertEqual(info["altitude"].size, self.ra_rads.size)
+        self.assertEqual(info["azimuth"].size, self.ra_rads.size)
+        self.assertAlmostEqual(info["airmass"][0], 1.9875095273411756, delta=1e-7)
+        self.assertAlmostEqual(info["altitude"][0], 0.52786436029017303, delta=1e-7)
+        self.assertFalse(numpy.isnan(info["azimuth"][0]))
 
     def test_configure(self):
         self.astro_sky.configure(exclude_planets=False)
@@ -184,7 +192,9 @@ class AstronomicalSkyTest(unittest.TestCase):
         latitude = 31.959954
         longitude = -111.599808
         height = 2097.0
-        location = ObservatoryLocation(math.radians(latitude), math.radians(longitude), height)
+        location = ObservatoryLocation(
+            math.radians(latitude), math.radians(longitude), height
+        )
         self.astro_sky.update_location(location)
         dp = self.astro_sky.date_profile
         self.assertEqual(dp.location.latitude, latitude)
@@ -192,7 +202,7 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.assertEqual(dp.location.height, height)
 
     def test_get_hour_angle(self):
-        initial_timestamp = self.start_stamp + (.04166666666 * 3600 * 24)
+        initial_timestamp = self.start_stamp + (0.04166666666 * 3600 * 24)
         self.create_ra_dec()
         self.astro_sky.update(initial_timestamp)
         hour_angle = self.astro_sky.get_hour_angle(self.ra_rads)
