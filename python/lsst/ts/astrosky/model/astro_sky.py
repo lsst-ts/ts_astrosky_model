@@ -18,18 +18,19 @@
 #
 # You should have received a copy of the GNU General Public License
 
+__all__ = ["AstronomicalSkyModel"]
+
 import logging
 import numpy
 import palpy
 
-from lsst.sims.skybrightness_pre import SkyModelPre
-from lsst.sims.skybrightness_pre import __version__ as sky_model_pre_version
-from lsst.sims.utils import _raDec2Hpid
+from rubin_sim.skybrightness_pre import SkyModelPre
+from rubin_sim import __version__ as sky_model_pre_version
+from rubin_sim.utils import _raDec2Hpid
 
-from lsst.ts.astrosky.model import Sun
 from lsst.ts.dateloc import DateProfile
 
-__all__ = ["AstronomicalSkyModel"]
+from . import Sun
 
 
 class AstronomicalSkyModel(object):

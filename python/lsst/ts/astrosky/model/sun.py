@@ -18,7 +18,6 @@
 #
 # You should have received a copy of the GNU General Public License
 
-from __future__ import division
 from datetime import datetime
 import math
 
