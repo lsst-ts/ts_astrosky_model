@@ -1,0 +1,38 @@
+{% set data= load_setup_py_data() %}
+package:
+  name: "ts-astrosky-model"
+  version: {{ data.get('version') }}
+
+source:
+  path: ../
+
+build:
+  noarch: generic
+  script: python -m pip install --no-deps --ignore-installed .
+
+test:
+  requires:
+    - ts-conda-build =0.3
+    - rubin-sim
+    - ts-dateloc
+  source_files:
+    - python
+    - tests
+    - setup.cfg
+  commands:
+    - rs_download_data    
+    - py.test -vs
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools_scm
+    - setuptools
+    - pytest-runner
+  run:
+    - python
+    - setuptools
+    - setuptools_scm
+    - rubin-sim
+    - ts-dateloc
