@@ -3,6 +3,14 @@
 History
 -------
 
+1.3.0 (2022-06-23)
+~~~~~~~~~~~~~~~~~~
+
+* Upgrade to pyproject.toml.
+* Update unit tests to be compatible with the latest version of rubin-sim.
+  Basically, had to change the time when the tests are exe
+* Update AstroSky to make it compatible with the latest version of rubin-sim.
+
 1.2.0 (2021-06-22)
 ~~~~~~~~~~~~~~~~~~
 
