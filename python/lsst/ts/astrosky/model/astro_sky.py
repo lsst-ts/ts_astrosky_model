@@ -20,10 +20,17 @@
 
 __all__ = ["AstronomicalSkyModel"]
 
-import logging
-import numpy
 import palpy
+import numpy
+import typing
+import logging
+import warnings
 
+from astropy import units
+from astropy.time import Time
+from astropy.coordinates import get_sun, get_moon
+
+from rubin_sim.skybrightness import SkyModel
 from rubin_sim.skybrightness_pre import SkyModelPre
 from rubin_sim import __version__ as sky_model_pre_version
 from rubin_sim.utils import _raDec2Hpid
@@ -44,8 +51,9 @@ class AstronomicalSkyModel(object):
         """
         self.log = logging.getLogger("sky_model.AstronomicalSkyModel")
         self.date_profile = DateProfile(0, location)
-        self.sky_brightness = SkyModelPre()
-        self._sb_nside = self.sky_brightness.nside
+        self.sky_brightness_pre = SkyModelPre()
+        self._sb_nside = self.sky_brightness_pre.nside
+        self.sky_brightness = SkyModel()
         self.sun = Sun()
         self.exclude_planets = True
 
@@ -62,9 +70,6 @@ class AstronomicalSkyModel(object):
     def get_airmass(self, ra, dec):
         """Get the airmass of the fields.
 
-        The field ids stored in the airmass data are off-by-one from the stored
-        field ids, hence the subtraction.
-
         Parameters
         ----------
         ra : `numpy.array`
@@ -77,10 +82,12 @@ class AstronomicalSkyModel(object):
         `numpy.array`
             The set of airmasses.
         """
-        ids = _raDec2Hpid(self._sb_nside, ra, dec)
-        return self.sky_brightness.returnAirmass(
-            self.date_profile.mjd, indx=ids, badval=float("nan")
+        self.sky_brightness.setRaDecMjd(
+            lon=ra,
+            lat=dec,
+            mjd=self.date_profile.mjd,
         )
+        return self.sky_brightness.airmass
 
     def get_alt_az(self, ra, dec):
         """Get the altitude (radians) and azimuth (radians) of a given sky
@@ -147,7 +154,7 @@ class AstronomicalSkyModel(object):
             The set of information pertaining to the moon and sun. All angles
             are in radians.
         """
-        attrs = self.sky_brightness.returnSunMoon(self.date_profile.mjd)
+        attrs = self.get_sun_moon()
         moon_distance = self.get_separation("moon", field_ra, field_dec)
         sun_distance = self.get_separation("sun", field_ra, field_dec)
 
@@ -263,7 +270,7 @@ class AstronomicalSkyModel(object):
         `numpy.array` of `float`
             The list of field-moon separations in radians.
         """
-        attrs = self.sky_brightness.returnSunMoon(self.date_profile.mjd)
+        attrs = self.get_sun_moon()
         return palpy.dsepVector(
             field_ra,
             field_dec,
@@ -293,7 +300,7 @@ class AstronomicalSkyModel(object):
             Flag to extrapolate fields with bad sky brightness to nearest field
             that is good.
         override_exclude_planets : `boolean`, optional
-            Override the internally stored exclude_planets flag.
+            (Deprecated) Override the internally stored exclude_planets flag.
 
         Returns
         -------
@@ -301,18 +308,17 @@ class AstronomicalSkyModel(object):
             The LSST 6 filter sky brightness magnitudes.
         """
         if override_exclude_planets is not None:
-            exclude_planets = override_exclude_planets
-        else:
-            exclude_planets = self.exclude_planets
+            warnings.warn(
+                "Parameter `override_exclude_planets` is deprecated.",
+                DeprecationWarning,
+            )
 
         ids = _raDec2Hpid(self._sb_nside, ra, dec)
 
-        return self.sky_brightness.returnMags(
+        return self.sky_brightness_pre.returnMags(
             self.date_profile.mjd,
             indx=ids,
             badval=float("nan"),
-            zenith_mask=False,
-            planet_mask=exclude_planets,
             extrapolate=extrapolate,
         )
 
@@ -355,12 +361,10 @@ class AstronomicalSkyModel(object):
             ts = timestamp + i * timestep
             mjd, _ = dp(ts)
             mags.append(
-                self.sky_brightness.returnMags(
+                self.sky_brightness_pre.returnMags(
                     dp.mjd,
                     indx=ids,
                     badval=float("nan"),
-                    zenith_mask=False,
-                    planet_mask=self.exclude_planets,
                     extrapolate=False,
                 )
             )
@@ -400,7 +404,7 @@ class AstronomicalSkyModel(object):
         `list` of `tuple` (key, value)
         """
         config = []
-        header = self.sky_brightness.header
+        header = self.sky_brightness_pre.header
         config.append(("sky_brightness_pre/program_version", sky_model_pre_version))
         config.append(("sky_brightness_pre/file_version", header["version"]))
         config.append(("sky_brightness_pre/fingerprint", header["fingerprint"]))
@@ -436,3 +440,31 @@ class AstronomicalSkyModel(object):
             information.
         """
         self.date_profile.location = location
+
+    def get_sun_moon(self) -> typing.Dict[str, float]:
+        """Return sun and moon position.
+
+        Returns
+        -------
+        `dict`
+            Dictionary with the sun and moon position.
+        """
+        mjd = Time(self.date_profile.mjd, format="mjd")
+
+        coord_sun = get_sun(mjd)
+        coord_moon = get_moon(mjd)
+        moon_sun_sep = numpy.degrees(
+            palpy.dsepVector(
+                numpy.array([coord_sun.ra.to(units.rad).value]),
+                numpy.array([coord_sun.dec.to(units.rad).value]),
+                numpy.array([coord_moon.ra.to(units.rad).value]),
+                numpy.array([coord_moon.dec.to(units.rad).value]),
+            )
+        )[0]
+        return dict(
+            sunRA=coord_sun.ra.to(units.rad).value,
+            sunDec=coord_sun.dec.to(units.rad).value,
+            moonRA=coord_moon.ra.to(units.rad).value,
+            moonDec=coord_moon.dec.to(units.rad).value,
+            moonSunSep=moon_sun_sep,
+        )
