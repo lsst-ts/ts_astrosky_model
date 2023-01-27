@@ -33,7 +33,7 @@ from astropy.coordinates import get_sun, get_moon
 from rubin_sim.skybrightness import SkyModel
 from rubin_sim.skybrightness_pre import SkyModelPre
 from rubin_sim import __version__ as sky_model_pre_version
-from rubin_sim.utils import _raDec2Hpid
+from rubin_sim.utils import _ra_dec2_hpid
 
 from lsst.ts.dateloc import DateProfile
 
@@ -82,7 +82,7 @@ class AstronomicalSkyModel(object):
         `numpy.array`
             The set of airmasses.
         """
-        self.sky_brightness.setRaDecMjd(
+        self.sky_brightness.set_ra_dec_mjd(
             lon=ra,
             lat=dec,
             mjd=self.date_profile.mjd,
@@ -313,9 +313,9 @@ class AstronomicalSkyModel(object):
                 DeprecationWarning,
             )
 
-        ids = _raDec2Hpid(self._sb_nside, ra, dec)
+        ids = _ra_dec2_hpid(self._sb_nside, ra, dec)
 
-        return self.sky_brightness_pre.returnMags(
+        return self.sky_brightness_pre.return_mags(
             self.date_profile.mjd,
             indx=ids,
             badval=float("nan"),
@@ -355,13 +355,13 @@ class AstronomicalSkyModel(object):
         """
         dp = DateProfile(0, self.date_profile.location)
         mags = []
-        ids = _raDec2Hpid(self._sb_nside, ra, dec)
+        ids = _ra_dec2_hpid(self._sb_nside, ra, dec)
 
         for i in range(num_steps):
             ts = timestamp + i * timestep
             mjd, _ = dp(ts)
             mags.append(
-                self.sky_brightness_pre.returnMags(
+                self.sky_brightness_pre.return_mags(
                     dp.mjd,
                     indx=ids,
                     badval=float("nan"),
