@@ -18,8 +18,8 @@
 #
 # You should have received a copy of the GNU General Public License
 
-from datetime import datetime
 import unittest
+from datetime import datetime
 
 from lsst.ts.astrosky.model import Sun
 

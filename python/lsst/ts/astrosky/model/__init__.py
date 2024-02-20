@@ -18,5 +18,5 @@
 #
 # You should have received a copy of the GNU General Public License
 
-from .sun import *
 from .astro_sky import *
+from .sun import *

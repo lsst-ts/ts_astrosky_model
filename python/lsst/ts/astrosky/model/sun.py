@@ -18,8 +18,8 @@
 #
 # You should have received a copy of the GNU General Public License
 
-from datetime import datetime
 import math
+from datetime import datetime
 
 __all__ = ["Sun"]
 
