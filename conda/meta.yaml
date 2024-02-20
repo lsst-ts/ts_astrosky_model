@@ -20,10 +20,9 @@ test:
   source_files:
     - python
     - tests
-    - setup.cfg
     - pyproject.toml
   commands:
-    - rs_download_data    
+    - scheduler_download_data --update
     - pytest -vs
 
 requirements:

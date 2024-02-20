@@ -19,15 +19,14 @@
 # You should have received a copy of the GNU General Public License
 
 import math
-import numpy
 import unittest
 import warnings
 
+import numpy
 from astropy.time import Time
-from rubin_scheduler.utils import survey_start_mjd
-
 from lsst.ts.astrosky.model import AstronomicalSkyModel
 from lsst.ts.dateloc import ObservatoryLocation
+from rubin_scheduler.utils import survey_start_mjd
 
 
 class AstronomicalSkyTest(unittest.TestCase):
@@ -90,7 +89,8 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.assertEqual(sky_mags[0]["g"].size, self.field_ids.size)
 
     def test_get_night_boundaries(self):
-        # These night boundaries have hard-coded values based on an older timestamp.
+        # These night boundaries have hard-coded values based on an older
+        # timestamp.
 
         # 2022/01/01
         # At sunset
