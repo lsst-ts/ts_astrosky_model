@@ -30,10 +30,9 @@ from astropy import units
 from astropy.time import Time
 from astropy.coordinates import get_sun, get_moon
 
-from rubin_sim.skybrightness import SkyModel
-from rubin_sim.skybrightness_pre import SkyModelPre
-from rubin_sim import __version__ as sky_model_pre_version
-from rubin_sim.utils import _ra_dec2_hpid
+from rubin_scheduler.skybrightness_pre import SkyModelPre
+from rubin_scheduler import __version__ as sky_model_pre_version
+from rubin_scheduler.utils import _ra_dec2_hpid
 
 from lsst.ts.dateloc import DateProfile
 
@@ -53,7 +52,6 @@ class AstronomicalSkyModel(object):
         self.date_profile = DateProfile(0, location)
         self.sky_brightness_pre = SkyModelPre()
         self._sb_nside = self.sky_brightness_pre.nside
-        self.sky_brightness = SkyModel()
         self.sun = Sun()
         self.exclude_planets = True
 
@@ -82,12 +80,10 @@ class AstronomicalSkyModel(object):
         `numpy.array`
             The set of airmasses.
         """
-        self.sky_brightness.set_ra_dec_mjd(
-            lon=ra,
-            lat=dec,
-            mjd=self.date_profile.mjd,
-        )
-        return self.sky_brightness.airmass
+        alts, az = self.get_alt_az(ra, dec)
+        # Calculate airmass as in the ESO model / rubin_sim.Skybrightness
+        airmass = 1.0 / numpy.cos(numpy.pi / 2.0 - alts)
+        return airmass
 
     def get_alt_az(self, ra, dec):
         """Get the altitude (radians) and azimuth (radians) of a given sky
@@ -285,7 +281,7 @@ class AstronomicalSkyModel(object):
         single time.
 
         This function retrieves the LSST 6 filter sky brightness magnitudes for
-        a given set of fields at the MJD kept by the
+        a given set of ra/decs at the MJD kept by the
         lsst.ts.dateloc.DateProfile.
 
         Parameters
@@ -327,11 +323,9 @@ class AstronomicalSkyModel(object):
         times.
 
         This function retrieves the LSST 6 filter sky brightness magnitudes for
-        a given set of fields at a range of MJDs provided via the timeblock
+        a given set of ra/decs at a range of MJDs provided via the timeblock
         information.
 
-        The field ids stored in the sky brightness data are off-by-one from the
-        stored field ids, hence the subtraction.
 
         Parameters
         ----------
@@ -374,7 +368,7 @@ class AstronomicalSkyModel(object):
     def get_target_information(self, ra, dec):
         """Get information about target(s).
 
-        This function gathers airmass, altitude (radians) and azimuth (radians)
+        This function gathers altitude (radians) and azimuth (radians)
         information for the target.
 
         Parameters
@@ -390,8 +384,8 @@ class AstronomicalSkyModel(object):
             Set of information about the target(s).
         """
         info_dict = {}
-        info_dict["airmass"] = self.get_airmass(ra, dec)
         altitude, azimuth = self.get_alt_az(ra, dec)
+        info_dict["airmass"] = 1.0 / numpy.cos(numpy.pi / 2.0 - altitude)
         info_dict["altitude"] = altitude
         info_dict["azimuth"] = azimuth
         return info_dict
