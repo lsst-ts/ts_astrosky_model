@@ -29,12 +29,11 @@ import palpy
 from astropy import units
 from astropy.coordinates import get_moon, get_sun
 from astropy.time import Time
+from lsst.ts.astrosky.model.sun import Sun
 from lsst.ts.dateloc import DateProfile
 from rubin_scheduler import __version__ as sky_model_pre_version
 from rubin_scheduler.skybrightness_pre import SkyModelPre
 from rubin_scheduler.utils import _ra_dec2_hpid
-
-from . import Sun
 
 
 class AstronomicalSkyModel(object):
