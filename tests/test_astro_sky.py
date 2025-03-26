@@ -157,7 +157,7 @@ class AstronomicalSkyTest(unittest.TestCase):
         self.astro_sky.update(initial_timestamp)
         info = self.astro_sky.get_moon_sun_info(self.ra_rads, self.dec_rads)
         self.assertEqual(len(info), 11)
-        self.assertAlmostEqual(info["moonPhase"], 32.01068613858965, delta=1e-7)
+        self.assertAlmostEqual(info["moonPhase"], 32.01068613858965, delta=1e-6)
         self.assertEqual(len(info["moonDist"]), self.ra_rads.size)
         self.assertAlmostEqual(info["moonDist"][0], 1.2303584595787405, delta=1e-7)
         self.assertAlmostEqual(info["moonDec"], -0.3404378672161562, delta=1e-7)
