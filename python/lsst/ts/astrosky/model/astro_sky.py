@@ -27,7 +27,7 @@ import warnings
 import numpy
 import palpy
 from astropy import units
-from astropy.coordinates import get_moon, get_sun
+from astropy.coordinates import get_body
 from astropy.time import Time
 from lsst.ts.astrosky.model.sun import Sun
 from lsst.ts.dateloc import DateProfile
@@ -442,8 +442,8 @@ class AstronomicalSkyModel(object):
         """
         mjd = Time(self.date_profile.mjd, format="mjd")
 
-        coord_sun = get_sun(mjd)
-        coord_moon = get_moon(mjd)
+        coord_sun = get_body("sun", mjd)
+        coord_moon = get_body("moon", mjd)
         moon_sun_sep = numpy.degrees(
             palpy.dsepVector(
                 numpy.array([coord_sun.ra.to(units.rad).value]),
