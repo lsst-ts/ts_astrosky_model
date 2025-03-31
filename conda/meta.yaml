@@ -40,7 +40,7 @@ requirements:
     - python {{ python }}
     - setuptools
     - setuptools_scm
-    - astropy =6
+    - astropy
     - palpy
     - rubin-scheduler
     - ts-dateloc
