@@ -12,8 +12,8 @@ build:
 
 test:
   requires:
-    - ts-conda-build =0.4
-    - astropy
+    - ts-conda-build =0.5
+    - astropy-base
     - palpy
     - rubin-scheduler
     - ts-dateloc
@@ -35,12 +35,12 @@ requirements:
     - python {{ python }}
     - setuptools_scm
     - setuptools
-    - ts-conda-build =0.4
+    - ts-conda-build =0.5
   run:
     - python {{ python }}
     - setuptools
     - setuptools_scm
-    - astropy =6
+    - astropy-base >=7.1,<8
     - palpy
     - rubin-scheduler
     - ts-dateloc
