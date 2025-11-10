@@ -3,6 +3,13 @@
 History
 -------
 
+1.4.2 (2025-11-10)
+------------------
+
+* Update to ts-conda-build and astropy versions.
+* Update to unit tests to work with latest version of astropy.
+  
+
 1.4.1 (2025-03-26)
 ~~~~~~~~~~~~~~~~~~
 
