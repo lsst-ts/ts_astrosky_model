@@ -3,7 +3,13 @@
 History
 -------
 
-1.4.2 (2025-11-10)
+1.5.6 (2025-11-11)
+------------------
+
+* Updated conda recipe.
+* Updated setup.py to ensure version file is generated.
+
+1.5.5 (2025-11-10)
 ------------------
 
 * Update to ts-conda-build and astropy versions.
